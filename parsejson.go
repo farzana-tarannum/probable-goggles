@@ -108,17 +108,21 @@ func main() {
   mapProducts := make(map[int]Product)
   products := []Product{}
   getProducts("products.json", &products)
-  
+ 
+ 
   for _, product := range products {
-    fmt.Printf("SKU: %d, Price: %f\n", product.Sku, product.Price)
+//    fmt.Printf("SKU: %d, Price: %f\n", product.Sku, product.Price)
     mapProducts[product.Sku] = product
   }
-
-
   
+
+
+  averageDiscount := 0.0 
   for _, order := range orders { 
     // discount is not empty
     discount := 1.0
+    orderedPrice := 0.0
+    orderedDiscountedPrice := 0.0
     if order.Discount != "" {
       fmt.Printf("Order ID: %d, Discount: %s\n", order.OrderId, order.Discount)
       discount = mapDiscounts[order.Discount]
@@ -133,12 +137,19 @@ func main() {
       product := mapProducts[item.Sku]
       fmt.Printf("Price: %f\n", product.Price)
       total := product.Price * float64(item.Quantity) 
+      orderedPrice += total
       discountedTotal := total - (total * discount)
+      orderedDiscountedPrice += discountedTotal
 
       fmt.Printf("Total: %f Discounted Total: %f\n", total, discountedTotal)
 
     }
+    fmt.Printf("Ordered Price: %f, Ordered Discounted Price: %f\n", orderedPrice, orderedDiscountedPrice)
+    averageDiscount += (orderedPrice - orderedDiscountedPrice) / orderedPrice
   }
+  averageDiscount = averageDiscount / float64(len(orders))
+  fmt.Printf("Average Discount: %f\n", averageDiscount * 100.0)
+  
 }
 
 
