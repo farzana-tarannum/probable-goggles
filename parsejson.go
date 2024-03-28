@@ -5,6 +5,7 @@ import (
   "fmt"
   "io/ioutil"
   "os"
+  "strings"
 )
 
 type Order struct {
@@ -96,9 +97,9 @@ func getProducts(filename string, products *[]Product) {
 func main() {
 
   orders := []Order{}
-  getOrders("orders.json", &orders)
+  getOrders("part/orders.json", &orders)
   discounts := []Discount{}
-  getDiscounts("discounts.json", &discounts)
+  getDiscounts("part/discounts.json", &discounts)
   mapDiscounts := make(map[string]float64)
 
   for _, discount := range discounts {
@@ -107,7 +108,7 @@ func main() {
 
   mapProducts := make(map[int]Product)
   products := []Product{}
-  getProducts("products.json", &products)
+  getProducts("part/products.json", &products)
  
  
   for _, product := range products {
@@ -120,15 +121,23 @@ func main() {
   averageDiscount := 0.0 
   for _, order := range orders { 
     // discount is not empty
-    discount := 1.0
+    discount := 0.0
     orderedPrice := 0.0
     orderedDiscountedPrice := 0.0
     if order.Discount != "" {
-      fmt.Printf("Order ID: %d, Discount: %s\n", order.OrderId, order.Discount)
-      discount = mapDiscounts[order.Discount]
-      fmt.Printf("Discount: %f\n", discount)
+
+      splitDiscount := []string{}
+      // split discount string by comma
+      splitDiscount = strings.Split(order.Discount, ",")
+
+      for _, coupon := range splitDiscount { 
+	fmt.Printf("Order ID: %d, Discount: %s, Coupon: %s\n", order.OrderId, order.Discount, coupon)
+	discount += mapDiscounts[coupon]
+	fmt.Printf("Discount: %f\n", discount)
+      }
       
     } else {
+      discount = 1.0
       fmt.Printf("Order ID: %d\n", order.OrderId)
     }
 
